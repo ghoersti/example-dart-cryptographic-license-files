@@ -3,6 +3,7 @@ import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart';
 import 'activateLicense.dart' as al;
+import 'utils.dart' as utils;
 
 Map<String, String> head = {
   "Content-Type": "application/vnd.api+json",
@@ -37,8 +38,9 @@ createProduct(Map<String, String> h, String product_name, String product_url,
     var jsonResponse =
         convert.jsonDecode(response.body) as Map<String, dynamic>;
     print(jsonResponse);
+    print("\n");
     final id = jsonResponse['data']['id'];
-    al.writeFile('./data/products/$id.json', jsonResponse);
+    utils.writeFile('./data/products/$id.json', jsonResponse);
 
     return jsonResponse;
   } else {
@@ -48,8 +50,8 @@ createProduct(Map<String, String> h, String product_name, String product_url,
 
 void main() async {
   //TODO: This is broken not sure why the stdin is bleeding through to the next call
-  String pname = al.readStdin('Product Name');
-  // String purl = al.readStdin('Product URL');
+  String pname = utils.readStdin('Product Name');
+  // String purl = utils.readStdin('Product URL');
   String purl = 'https://test.com';
   print("CREATING PRODUCT \n");
   createProduct(head, pname, purl);

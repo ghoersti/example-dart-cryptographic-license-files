@@ -2,7 +2,8 @@
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart';
-import 'activateLicense.dart' as al;
+import 'demoLicense.dart' as al;
+import 'utils/utils.dart' as utils;
 
 Map<String, String> head = {
   "Content-Type": "application/vnd.api+json",
@@ -20,7 +21,12 @@ createPolicy(Map<String, String> h, String productId, String policyName) async {
   var body = convert.json.encode({
     "data": {
       "type": "policies",
-      "attributes": {"name": "$policyName"},
+      "attributes": {
+        "name": "$policyName",
+        "strict": true,
+        "maxMachines": 1,
+        'fingerprintUniquenessStrategy': 'UNIQUE_PER_LICENSE',
+      },
       "relationships": {
         "product": {
           "data": {"type": "product", "id": "$productId"}
@@ -33,8 +39,9 @@ createPolicy(Map<String, String> h, String productId, String policyName) async {
     var jsonResponse =
         convert.jsonDecode(response.body) as Map<String, dynamic>;
     print(jsonResponse);
+    print("\n");
     final id = jsonResponse['data']['id'];
-    al.writeFile('./data/policies/$id.json', jsonResponse);
+    utils.writeFile('./data/policies/$id.json', jsonResponse);
 
     return jsonResponse;
   } else {
@@ -44,10 +51,9 @@ createPolicy(Map<String, String> h, String productId, String policyName) async {
 
 void main() async {
   //TODO: These are all hard coded to the same product for now.
-  String pname = al.readStdin('Policy Name');
-  // String purl = al.readStdin('Product URL');
+  String pname = utils.readStdin('Policy Name');
+  // String purl = utils.readStdin('Product URL');
   String purl = 'https://test.com';
-
   String product_id = '0e62c7cc-74da-42e6-a0b8-2e7a3419867d';
   print("CREATING POLICY \n");
   createPolicy(head, product_id, pname);
