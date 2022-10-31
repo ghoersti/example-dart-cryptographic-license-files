@@ -2,4 +2,6 @@
 /.packages
 /bin/
 .env
+data
+!data/.keep
 

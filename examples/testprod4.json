@@ -1,0 +1,21 @@
+{
+data: {id: 0e62c7cc-74da-42e6-a0b8-2e7a3419867d, 
+type: products, 
+attributes: {name: testprod4, distributionStrategy: LICENSED, 
+url: https://test.com, 
+platforms: [Darwin, not_darwin], metadata: {}, created: 2022-10-31T18:46:48.627Z, updated: 2022-10-31T18:46:48.627Z}, 
+relationships: {account: {links: {related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0}, 
+data: {type: accounts, id: ee23e08c-8d74-482a-ac48-6bda569163e0}}, 
+policies: {
+    links: {
+        related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d/policies}
+        }, licenses: {links: {related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d/licenses}}, 
+        machines: {links: {related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d/machines}}, 
+        users: {links: {related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d/users}}, 
+        tokens: {links: {related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d/tokens}}, 
+        platforms: {links: {related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d/platforms}}, 
+        channels: {links: {related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d/channels}}, 
+        releases: {links: {related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d/releases}}, 
+        artifacts: {links: {related: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d/artifacts}}}, 
+links: {self: /v1/accounts/ee23e08c-8d74-482a-ac48-6bda569163e0/products/0e62c7cc-74da-42e6-a0b8-2e7a3419867d}}
+}

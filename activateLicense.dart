@@ -6,12 +6,11 @@ import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart';
 import 'package:uuid/uuid.dart' as uuid;
 import 'package:crypto/crypto.dart' as crypto;
-// import 'package:path_provider/path_provider.dart' as path;
 
 readStdin(String printmsg) {
   stdout.write("$printmsg : ");
   var input = stdin.readLineSync();
-  stdout.write(input);
+  stdout.write('$input\n');
   return input;
 }
 
@@ -34,7 +33,18 @@ listDirectory(String dir_path) async {
 
 createDirectory(String dir) async {
   try {
-    Directory('./$dir').create();
+    Directory('./$dir').create(recursive: true);
+  } catch (e) {
+    print(e.toString());
+  }
+}
+
+createDirectories() async {
+  try {
+    createDirectory("data/licenses");
+    createDirectory("data/users");
+    createDirectory("data/policies");
+    createDirectory("data/products");
   } catch (e) {
     print(e.toString());
   }
@@ -45,6 +55,21 @@ readFile(String filepath) async {
   try {
     var contents = await config.readAsString();
     print(contents);
+    return contents;
+  } catch (e) {
+    print(e);
+  }
+}
+
+writeFile(String filepath, data) async {
+  var config = File('$filepath');
+  try {
+    var f = File('$filepath');
+    var sink = f.openWrite();
+    sink.write('$data');
+    await sink.flush();
+    await sink.close();
+    print('File $filepath created. ');
   } catch (e) {
     print(e);
   }
@@ -115,6 +140,11 @@ createUser(h, {bool stdin_flag: false}) async {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
       print(jsonResponse);
+      //hash of email for filename
+      var usr_email_hash = hashit(strHash: '$email');
+      var usr_json = './data/users/$usr_email_hash.json';
+      writeFile('$usr_json', jsonResponse);
+
       return jsonResponse;
     } else {
       print('Request failed status : ${response.body}.');
@@ -173,20 +203,17 @@ createLicense(h, policyid, userid) async {
   }
 }
 
-// Future<String> get _localPath async {
-//   final directory = await path.getApplicationDocumentsDirectory();
-
-//   return directory.path;
-// }
+//Create Directories
+//TODO: refactor all this and add to utils or use db
 
 //ACTIVATE LICENSE
 void main() async {
   print("Account : $acc \nPubKey: $pub \nToken: $tkn");
-
+  createDirectories();
   readFile('./.env');
   listDirectory('.');
-  createDirectory("license_data");
-  // createUser(head, stdin_flag: true);
+
+  var user_response = createUser(head, stdin_flag: true);
 }
 //   createUser(head);
 //   whoami(head);
