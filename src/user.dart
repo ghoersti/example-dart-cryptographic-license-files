@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart';
 import 'package:uuid/uuid.dart' as uuid;
 import 'package:crypto/crypto.dart' as crypto;
-import 'utils/utils.dart' as utils;
+import '../utils/utils.dart' as utils;
 
 Map<String, String> head = {
   "Content-Type": "application/vnd.api+json",
@@ -77,7 +77,7 @@ createUser(h, {bool stdin_flag: false}) async {
 }
 
 // get license ID
-// Needs user token
+// TODO: Needs user token as bearer
 // multiple activations
 whoami(h, String user_token) async {
   var url = Uri.https('api.keygen.sh', '/v1/accounts/$acc/me');
