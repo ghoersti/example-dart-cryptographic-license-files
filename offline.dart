@@ -18,9 +18,10 @@ void main(List<String> argv) async {
 
   // Read and parse license file
   var cert = await File(args['license-file']).readAsString();
-  var enc = cert.replaceFirst('-----BEGIN LICENSE FILE-----', "")
-                .replaceFirst('-----END LICENSE FILE-----', "")
-                .replaceAll('\n', '');
+  var enc = cert
+      .replaceFirst('-----BEGIN LICENSE FILE-----', "")
+      .replaceFirst('-----END LICENSE FILE-----', "")
+      .replaceAll('\n', '');
 
   var dec = decoder.decode(enc);
   var lic = json.decode(dec);
@@ -34,7 +35,8 @@ void main(List<String> argv) async {
   bool ok;
 
   try {
-    var pubkey = SimplePublicKey(hex.decode(args['public-key']), type: KeyPairType.ed25519);
+    var pubkey = SimplePublicKey(hex.decode(args['public-key']),
+        type: KeyPairType.ed25519);
     var msg = Uint8List.fromList(utf8.encode("license/" + lic['enc']));
     var sig = base64.decode(lic['sig']);
     var ed = Ed25519();
@@ -60,7 +62,8 @@ void main(List<String> argv) async {
   String plaintext;
 
   try {
-    var parts = (lic['enc'] as String).split('.').map((s) => base64.decode(s)).toList();
+    var parts =
+        (lic['enc'] as String).split('.').map((s) => base64.decode(s)).toList();
     var ciphertext = parts[0];
     var nonce = parts[1];
     var mac = parts[2];
