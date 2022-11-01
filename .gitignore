@@ -1,3 +1,7 @@
 /.dart_tool/
 /.packages
 /bin/
+.env
+data
+!data/.keep
+
