@@ -13,7 +13,7 @@ Map<String, String> head = {
   "Authorization": "Bearer $tkn"
 };
 
-var env = DotEnv(includePlatformEnvironment: true)..load(['./.env']);
+var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
 var acc = env['KEYGEN_ACCOUNT_ID'];
 var pub = env['KEYGEN_PUBLIC_KEY'];
 var tkn = env['TOKEN'];

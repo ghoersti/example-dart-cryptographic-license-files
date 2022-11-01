@@ -52,7 +52,7 @@ createUser(h, {bool stdin_flag: false}) async {
         "attributes": {
           "firstName": "$fname",
           "lastName": "$lname",
-          "email": "$email",
+          "email": "$email", //TODO: needs to be min length 6
           "password": "$pw"
         }
       }
