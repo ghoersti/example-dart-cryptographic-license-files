@@ -2,8 +2,8 @@
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart';
-import 'activateLicense.dart' as al;
-import 'utils.dart' as utils;
+import 'demoLicense.dart' as al;
+import '../utils/utils.dart' as utils;
 
 Map<String, String> head = {
   "Content-Type": "application/vnd.api+json",
@@ -11,7 +11,7 @@ Map<String, String> head = {
   "Authorization": "Bearer $tkn"
 };
 
-var env = DotEnv(includePlatformEnvironment: true)..load(['./.env']);
+var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
 var acc = env['KEYGEN_ACCOUNT_ID'];
 var pub = env['KEYGEN_PUBLIC_KEY'];
 var tkn = env['TOKEN'];
@@ -21,6 +21,7 @@ var tkn = env['TOKEN'];
 
 createProduct(Map<String, String> h, String product_name, String product_url,
     {List<String> platforms = const ["Darwin", "not_darwin"]}) async {
+  utils.createDirectories();
   var url = Uri.https('api.keygen.sh', '/v1/accounts/$acc/products');
   var body = convert.json.encode({
     "data": {
@@ -40,7 +41,7 @@ createProduct(Map<String, String> h, String product_name, String product_url,
     print(jsonResponse);
     print("\n");
     final id = jsonResponse['data']['id'];
-    utils.writeFile('./data/products/$id.json', jsonResponse);
+    utils.writeFile('../data/products/$id.json', jsonResponse);
 
     return jsonResponse;
   } else {

@@ -14,7 +14,7 @@ Map<String, String> head = {
   "Authorization": "Bearer $tkn"
 };
 
-var env = DotEnv(includePlatformEnvironment: true)..load(['./.env']);
+var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
 var acc = env['KEYGEN_ACCOUNT_ID'];
 var pub = env['KEYGEN_PUBLIC_KEY'];
 var tkn = env['TOKEN'];
@@ -66,7 +66,7 @@ createUser(h, {bool stdin_flag: false}) async {
       print(jsonResponse);
       //hash of email for filename
       var usr_email_hash = utils.hashit(strHash: '$email');
-      var usr_json = './data/users/$usr_email_hash.json';
+      var usr_json = '../data/users/$usr_email_hash.json';
       utils.writeFile('$usr_json', jsonResponse);
 
       return jsonResponse;

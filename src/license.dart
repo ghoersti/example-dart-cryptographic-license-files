@@ -6,9 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart';
 import 'package:uuid/uuid.dart' as uuid;
 import 'package:crypto/crypto.dart' as crypto;
-import 'utils/utils.dart' as utils;
+import '../utils/utils.dart' as utils;
 
-var env = DotEnv(includePlatformEnvironment: true)..load(['./.env']);
+var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
 var acc = env['KEYGEN_ACCOUNT_ID'];
 var pub = env['KEYGEN_PUBLIC_KEY'];
 var tkn = env['TOKEN'];
@@ -46,7 +46,7 @@ createLicense(Map<String, String> h, String policyid, String userid) async {
     print(jsonResponse);
     print("\n");
     final id = jsonResponse['data']['id'];
-    utils.writeFile('./data/policies/$id.json', jsonResponse);
+    utils.writeFile('../data/licenses/$id.json', jsonResponse);
     return jsonResponse;
   } else {
     print('Request failed with status : ${response.body}.');
