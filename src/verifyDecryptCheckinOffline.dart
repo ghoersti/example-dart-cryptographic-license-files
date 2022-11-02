@@ -17,7 +17,7 @@ import 'user.dart' as usr;
 import 'product.dart' as product;
 import 'policy.dart' as policy;
 import 'license.dart' as lic;
-import 'verifySignature.dart' as verify;
+import 'verifyDecrypt.dart' as decrypt;
 
 var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
 var acc = env['KEYGEN_ACCOUNT_ID'];
@@ -53,8 +53,9 @@ void main() async {
   // checkout license file
   //https://keygen.sh/docs/api/licenses/#licenses-actions-check-out
   //Using a get here to just snatch the license file write away
-  var license =
-      await lic.getLicenseFile(head, license_activation_token, license_id);
+  var license_response = await lic.getEncryptedLicenseResponse(
+      head, license_activation_token, license_id);
+  String license = license_response['data']['attributes']['certificate'];
   // utils.writeFile('../data/license_files/$license_id.lic', license);
-  var test = await verify.offlineVerification(license, license_key);
+  var test = await decrypt.offlineVerification(license, license_key);
 }

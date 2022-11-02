@@ -105,6 +105,38 @@ getLicenseFile(h, String act_token, String lid) async {
   }
 }
 
+//TODO: This is should be its own checkout class / file
+//This is janky returns response but writes license file
+getEncryptedLicenseResponse(h, String act_token, String lid) async {
+  var url = Uri.parse(
+      "https://api.keygen.sh/v1/accounts/$acc/licenses/$lid/actions/check-out?encrypt=1");
+  print('$act_token');
+  h.remove('Content-Type');
+  h['Authorization'] = "Bearer $act_token";
+  print(h);
+
+  try {
+    var response = await http.post(url, headers: h);
+    print("\nLICENSE-FILE:\n${response.body}");
+    if (response.statusCode == 200) {
+      var jsonResponse =
+          convert.jsonDecode(response.body) as Map<String, dynamic>;
+      print(jsonResponse);
+      print("\n");
+      String license_file = jsonResponse['data']['attributes']['certificate'];
+
+      print("\nENCRYPTED-LICENSE-FILE:\n${license_file}");
+      utils.writeFile('../data/license_files/ENC_$lid.lic', license_file);
+      return jsonResponse;
+    } else {
+      print('Request failed with : ${response.body}.');
+      return convert.jsonDecode(response.body) as Map<String, dynamic>;
+    }
+  } catch (err) {
+    print('ERROR: $err');
+  }
+}
+
 void main() async {
   await utils.createDirectories();
   String policy_id = "66af0bab-1150-45b5-94a8-041335659c42";
@@ -122,6 +154,12 @@ void main() async {
 
   final String license_activation_token =
       await tkn_response['data']['attributes']['token'];
+
+  final Map<String, dynamic> enc_lic_response =
+      await getEncryptedLicenseResponse(
+          head, license_activation_token, license_id);
+
+  print("yo $enc_lic_response");
 
   // print('Activation Token: $license_activation_token');
 }

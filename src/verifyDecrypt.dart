@@ -12,7 +12,7 @@ var acc = env['KEYGEN_ACCOUNT_ID'];
 var pub = env['KEYGEN_PUBLIC_KEY'];
 var tkn = env['TOKEN'];
 
-offlineVerification(String license_response) async {
+offlineVerification(String license_file, String license_key) async {
   var decoder = utf8.fuse(base64);
   // var parser = ArgParser();
   //license-file cert
@@ -26,7 +26,8 @@ offlineVerification(String license_response) async {
   // var args = parser.parse(argv);
 
   // Read and parse license file
-  var cert = await File(args['license-file']).readAsString();
+  // var cert = await File(license_path).readAsString();
+  var cert = license_file;
   var enc = cert
       .replaceFirst('-----BEGIN LICENSE FILE-----', "")
       .replaceFirst('-----END LICENSE FILE-----', "")
@@ -34,7 +35,6 @@ offlineVerification(String license_response) async {
 
   var dec = decoder.decode(enc);
   var lic = json.decode(dec);
-
   // Assert algorithm is supported
   if (lic['alg'] != 'aes-256-gcm+ed25519') {
     throw new Exception('unsupported license file algorithm');
@@ -44,8 +44,7 @@ offlineVerification(String license_response) async {
   bool ok;
 
   try {
-    var pubkey = SimplePublicKey(hex.decode(args['public-key']),
-        type: KeyPairType.ed25519);
+    var pubkey = SimplePublicKey(hex.decode('$pub'), type: KeyPairType.ed25519);
     var msg = Uint8List.fromList(utf8.encode("license/" + lic['enc']));
     var sig = base64.decode(lic['sig']);
     var ed = Ed25519();
@@ -62,9 +61,11 @@ offlineVerification(String license_response) async {
   // Print license file
   print("license file was successfully verified!");
   print("  > $lic");
+  // var data = decoder.decode(lic['enc']);
+  // print('$data');
 
   // Hash the license key to obtain decryption secret
-  var digest = sha256.convert(utf8.encode(args['license-key']));
+  var digest = sha256.convert(utf8.encode(license_key));
   var secret = SecretKey(digest.bytes);
 
   // Decrypt the license file's dataset
