@@ -23,6 +23,10 @@ var tkn = env['TOKEN'];
 //TODO: Need a delete user
 // retrieve user
 // update user
+//GUI
+// https://app.keygen.sh/users
+// DOCS
+//https://keygen.sh/docs/api/users/
 createUser(h, {bool stdin_flag: false}) async {
   var url = Uri.https('api.keygen.sh', '/v1/accounts/$acc/users');
   //When account is unprotected auth is not needed
@@ -76,23 +80,42 @@ createUser(h, {bool stdin_flag: false}) async {
   }
 }
 
+//TODO: can you verify without having to authenticate
+
 // get license ID
 // TODO: Needs user token as bearer
 // multiple activations
-whoami(h, String user_token) async {
-  var url = Uri.https('api.keygen.sh', '/v1/accounts/$acc/me');
+whoami(h, String token) async {
+  var url = Uri.parse("https://api.keygen.sh/v1/accounts/$acc/me");
+  print('$token');
   h.remove('Content-Type');
-  h['Authorization'] = "Bearer $user_token";
-  var response = await http.post(
-    url,
-    headers: h,
-  );
-  if (response.statusCode == 200) {
-    var jsonResponse =
-        convert.jsonDecode(response.body) as Map<String, dynamic>;
-    print(jsonResponse);
-    return jsonResponse;
-  } else {
-    print('Request failed with : ${response.statusCode}.');
+  h['Authorization'] = "Bearer $token";
+  print(h);
+
+  try {
+    var response = await http.get(url, headers: h);
+
+    if (response.statusCode == 200) {
+      var jsonResponse =
+          convert.jsonDecode(response.body) as Map<String, dynamic>;
+      print(jsonResponse);
+      return jsonResponse;
+    } else {
+      print('Request failed with : ${response.body}.');
+      return convert.jsonDecode(response.body) as Map<String, dynamic>;
+    }
+  } catch (err) {
+    print('ERROR: $err');
   }
+}
+
+void main() async {
+  await utils.createDirectories();
+  print("\nGET USING ACTIVATION TOKEN\n");
+  final String license_activation_token =
+      await "activ-9e7f7cc565d727432dc3421582d04c76v3";
+  final Map<String, dynamic> tkn_retrieve =
+      await whoami(head, license_activation_token);
+
+  // print('Activation Token: $license_activation_token');
 }

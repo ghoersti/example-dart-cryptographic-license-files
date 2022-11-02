@@ -3,6 +3,7 @@
 //TODO: sort packages
 //TODO: strongly type
 //TODO: readme
+
 import 'package:args/args.dart';
 import 'package:convert/convert.dart';
 import 'dart:typed_data';
@@ -10,7 +11,6 @@ import 'dart:io';
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart';
-import 'package:uuid/uuid.dart' as uuid;
 import 'package:crypto/crypto.dart' as crypto;
 import '../utils/utils.dart' as utils;
 import 'user.dart' as usr;
@@ -65,6 +65,7 @@ void main() async {
   final url = Uri.https('api.keygen.sh', '/v1/accounts/$acc/machines');
 
   //device fingerprint
+  // TODO: see if we can do in dart
   // will use  https://pub.dev/packages/platform_device_id in flutter
   // but for now ill just use a dummy hash
   final bytes = convert.utf8.encode('DUMMY_FINGERPRINT');

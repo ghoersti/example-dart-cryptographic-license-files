@@ -1,4 +1,4 @@
-// https://keygen.sh/docs/api/policies/
+//https://keygen.sh/docs/api/policies/
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart';
@@ -24,6 +24,7 @@ createPolicy(Map<String, String> h, String productId, String policyName) async {
       "attributes": {
         "name": "$policyName",
         "strict": true,
+        "scheme": "ED25519_SIGN", //needed for offline license
         "maxMachines": 1,
         'fingerprintUniquenessStrategy': 'UNIQUE_PER_LICENSE',
       },
