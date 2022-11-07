@@ -1,3 +1,4 @@
+//https://keygen.sh/docs/api/users/
 import 'package:args/args.dart';
 import 'dart:typed_data';
 import 'dart:io';
@@ -7,11 +8,12 @@ import 'package:dotenv/dotenv.dart';
 import 'package:uuid/uuid.dart' as uuid;
 import 'package:crypto/crypto.dart' as crypto;
 import '../utils/utils.dart' as utils;
+import 'package:dcli/dcli.dart';
 
 Map<String, String> head = {
-  "Content-Type": "application/vnd.api+json",
-  "Accept": "application/vnd.api+json",
-  "Authorization": "Bearer $tkn"
+  'Content-Type': 'application/vnd.api+json',
+  'Accept': 'application/vnd.api+json',
+  'Authorization': 'Bearer $tkn'
 };
 
 var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
@@ -27,43 +29,32 @@ var tkn = env['TOKEN'];
 // https://app.keygen.sh/users
 // DOCS
 //https://keygen.sh/docs/api/users/
-createUser(h, {bool stdin_flag: false}) async {
+
+createUser(h) async {
   var url = Uri.https('api.keygen.sh', '/v1/accounts/$acc/users');
   //When account is unprotected auth is not needed
   // h.remove('Authorization');
   // print(h);
-  if (stdin_flag == false) {
-    var name = uuid.Uuid().v4();
-    var body = convert.json.encode({
-      "data": {
-        "type": "users",
-        "attributes": {
-          "firstName": "John",
-          "lastName": "Doe_$name",
-          "email": "jdoe_$name@keygen.sh",
-          "password": "secret"
+  try {
+    String fname = await ask(blue('Enter FirstName:'));
+    print('=> $fname');
+    String lname = await ask(blue('Enter LastName:'));
+    print('=> $lname');
+    String email = await ask(blue('Enter Email:'));
+    print('=> $email');
+    String pw = await ask(blue('Enter Password:'), hidden: true);
+    var body = await convert.json.encode({
+      'data': {
+        'type': 'users',
+        'attributes': {
+          'firstName': '$fname',
+          'lastName': '$lname',
+          'email': '$email',
+          'password': '$pw'
         }
       }
     });
-  } else {
-    String fname = utils.readStdin('Enter FirstName');
-    String lname = utils.readStdin('Enter LastName');
-    String email = utils.readStdin('Enter Email');
-    String pw = utils.readStdin('Enter Password');
-    var body = convert.json.encode({
-      "data": {
-        "type": "users",
-        "attributes": {
-          "firstName": "$fname",
-          "lastName": "$lname",
-          "email": "$email",
-          "password": "$pw"
-        }
-      }
-    });
-
     var response = await http.post(url, headers: h, body: body);
-    //201 create
     if (response.statusCode == 201) {
       var jsonResponse =
           convert.jsonDecode(response.body) as Map<String, dynamic>;
@@ -77,7 +68,10 @@ createUser(h, {bool stdin_flag: false}) async {
     } else {
       print('Request failed status : ${response.body}.');
     }
+  } catch (e) {
+    print(e);
   }
+  ;
 }
 
 //TODO: can you verify without having to authenticate
@@ -86,12 +80,10 @@ createUser(h, {bool stdin_flag: false}) async {
 // TODO: Needs user token as bearer
 // multiple activations
 whoami(h, String token) async {
-  var url = Uri.parse("https://api.keygen.sh/v1/accounts/$acc/me");
+  var url = Uri.parse('https://api.keygen.sh/v1/accounts/$acc/me');
   print('$token');
   h.remove('Content-Type');
-  h['Authorization'] = "Bearer $token";
-  print(h);
-
+  h['Authorization'] = 'Bearer $token';
   try {
     var response = await http.get(url, headers: h);
 
@@ -111,11 +103,7 @@ whoami(h, String token) async {
 
 void main() async {
   await utils.createDirectories();
-  print("\nGET USING ACTIVATION TOKEN\n");
-  final String license_activation_token =
-      await "activ-9e7f7cc565d727432dc3421582d04c76v3";
-  final Map<String, dynamic> tkn_retrieve =
-      await whoami(head, license_activation_token);
 
-  // print('Activation Token: $license_activation_token');
+  print(green('\nCREATING USER'));
+  final Map<String, dynamic> tkn_retrieve = await createUser(head);
 }

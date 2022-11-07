@@ -17,6 +17,7 @@ import 'user.dart' as usr;
 import 'product.dart' as product;
 import 'policy.dart' as policy;
 import 'license.dart' as lic;
+import 'package:dcli/dcli.dart';
 
 var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
 var acc = env['KEYGEN_ACCOUNT_ID'];
@@ -36,41 +37,44 @@ Map<String, String> head = {
 
 //ACTIVATE LICENSE
 void main() async {
-  print("Account : $acc \nPubKey: $pub \nToken: $tkn");
+  //print("Account : $acc \nPubKey: $pub \nToken: $tkn");
   utils.createDirectories();
   //product
-  final String pname = await utils.readStdin('Product Name');
-  final String purl = 'https://test.com';
-  print("\nCREATING PRODUCT\n");
+  String pname = ask(blue('Enter Product Name:'));
+  print('=> $pname');
+  String purl = ask(blue('Enter Product Url:'));
+  print('=> $purl');
+  print(green('CREATING PRODUCT \n'));
   final Map<String, dynamic> product_response =
       await product.createProduct(head, pname, purl);
   String product_id = product_response['data']['id'];
 
   //policy
-  print("\nCREATING POLICY\n");
-  String policy_name = utils.readStdin("Product URL");
+  print(green('\nCREATING POLICY\n'));
+  String polname = ask(blue('Enter Policy Name:'));
+  print('=> $polname');
+  print(green('CREATING PRODUCT \n'));
   final Map<String, dynamic> policy_response =
-      await policy.createPolicy(head, product_id, policy_name);
+      await policy.createPolicy(head, product_id, polname);
   //user
-  print("\nCREATING USER\n");
-  final Map<String, dynamic> user_response =
-      await usr.createUser(head, stdin_flag: true);
+  print(green('\nCREATING USER\n'));
+  final Map<String, dynamic> user_response = await usr.createUser(head);
   //license
   final policy_id = policy_response['data']['id'];
   final user_id = user_response['data']['id'];
-  print("\nCREATING LICENSE\n");
+  print(green('\nCREATING LICENSE\n'));
   final Map<String, dynamic> license_response =
       await lic.createLicense(head, policy_id, user_id);
   final String license_id = license_response['data']['id'];
   final url = Uri.https('api.keygen.sh', '/v1/accounts/$acc/machines');
 
   //device fingerprint
-  // TODO: see if we can do in dart
+  // TODO: move to CLI cmd
   // will use  https://pub.dev/packages/platform_device_id in flutter
   // but for now ill just use a dummy hash
-  final bytes = convert.utf8.encode('DUMMY_FINGERPRINT');
-  final fingerprint = crypto.sha1.convert(bytes);
-
+  // final bytes = convert.utf8.encode('DUMMY_FINGERPRINT45');
+  // final fingerprint = crypto.sha1.convert(bytes);
+  final fingerprint = await utils.getFingerprint();
   var body = convert.json.encode({
     "data": {
       "type": "machines",
@@ -88,9 +92,12 @@ void main() async {
   });
   var response = await http.post(url, headers: head, body: body);
 
-  if (response.statusCode == 200) {
+  if (response.statusCode == 200 || response.statusCode == 201) {
     var jsonResponse =
         convert.jsonDecode(response.body) as Map<String, dynamic>;
+    print(green("\nMachine Activated\n"));
+    print(jsonResponse);
+    print("\n");
   } else {
     print('Request failed with : ${response.statusCode}.');
   }

@@ -14,10 +14,9 @@ import 'package:dotenv/dotenv.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import '../utils/utils.dart' as utils;
 import 'user.dart' as usr;
-import 'product.dart' as product;
-import 'policy.dart' as policy;
 import 'license.dart' as lic;
 import 'verifyDecrypt.dart' as decrypt;
+import 'package:dcli/dcli.dart';
 
 var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
 var acc = env['KEYGEN_ACCOUNT_ID'];
@@ -33,29 +32,34 @@ Map<String, String> head = {
   "Authorization": "Bearer $tkn"
 };
 
-//Create Directories
-//TODO: refactor all this and add to utils or use db
-//TODO: sort packages
-//TODO: strongly type
-
 //ACTIVATE LICENSE
 void main() async {
-  print("Account : $acc \nPubKey: $pub \nToken: $tkn");
+  //print("Account : $acc \nPubKey: $pub \nToken: $tkn");
+  //Filsystem acting as initial data store
   utils.createDirectories();
   final String license_activation_token =
-      await "activ-cb4fdfbb29ddf8717a1b6390a2d9d4dev3";
+      await "activ-037d00e8791b2667b4c92269afb3bb47v3";
 
-  print("\nGET USING ACTIVATION TOKEN\n");
+  print(green("\nGET USING ACTIVATION TOKEN\n"));
+  //RETIREIVE PERSIST LICENSE RESPONSE
   final Map<String, dynamic> license_resp =
       await usr.whoami(head, license_activation_token);
-  String license_id = await license_resp['data']['id'];
-  String license_key = await license_resp['data']['attributes']['key'];
-  // checkout license file
+  String license_id = license_resp['data']['id'];
+  String license_key = license_resp['data']['attributes']['key'];
+  //ACTIVATE ON MACHINE
+  //TODO: PERSIST MACHINE DATA , uses actual fingerprint now
+  print(green("\nCHECKOUT & DECRYPT LICENSE FILE\n"));
+  final Map<String, dynamic> activation_response = await lic
+      .activateWithLicenseToken(head, license_id, license_activation_token);
+  // CHECKOUT SAVE  LICENSE FILE
   //https://keygen.sh/docs/api/licenses/#licenses-actions-check-out
-  //Using a get here to just snatch the license file write away
+  //Using a POST here, GET will return only license file see **VerifySignature.dart
   var license_response = await lic.getEncryptedLicenseResponse(
       head, license_activation_token, license_id);
   String license = license_response['data']['attributes']['certificate'];
-  // utils.writeFile('../data/license_files/$license_id.lic', license);
-  var test = await decrypt.offlineVerification(license, license_key);
+
+  // VERIFY SIGNATURE DECRYPT DATA
+  print(green("\nACTIVATE MACHINE WITH ACT-TOKEN\n"));
+  Map<String, dynamic> decrypted_data =
+      await decrypt.offlineVerification(license, license_key);
 }

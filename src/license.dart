@@ -1,12 +1,13 @@
 import 'package:args/args.dart';
 import 'dart:typed_data';
-import 'dart:io';
+import 'dart:io' show Platform;
 import 'dart:convert' as convert;
 import 'package:http/http.dart' as http;
 import 'package:dotenv/dotenv.dart';
 import 'package:uuid/uuid.dart' as u;
 import 'package:crypto/crypto.dart' as crypto;
 import '../utils/utils.dart' as utils;
+import 'package:dcli/dcli.dart';
 
 var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
 var acc = env['KEYGEN_ACCOUNT_ID'];
@@ -21,8 +22,6 @@ Map<String, String> head = {
 
 //CREATE LICENSE
 createLicense(Map<String, String> h, String policyid, String userid) async {
-  // var url = Uri.https('api.keygen.sh', '/v1/accounts/$acc/licenses');
-
   var body = convert.json.encode({
     "data": {
       "type": "licenses",
@@ -49,7 +48,7 @@ createLicense(Map<String, String> h, String policyid, String userid) async {
     utils.writeFile('../data/licenses/$id.json', jsonResponse);
     return jsonResponse;
   } else {
-    print('Request failed with status : ${response.body}.');
+    print('Request failed with status : ${response.statusCode}.');
   }
 }
 
@@ -90,9 +89,8 @@ getLicenseFile(h, String act_token, String lid) async {
 
   try {
     var response = await http.get(url, headers: h);
-    print("\nLICENSE-FILE:\n${response.body}");
+
     if (response.statusCode == 200) {
-      print('TWO HUNID');
       print("\nLICENSE-FILE:\n${response.body}");
       utils.writeFile('../data/license_files/$lid.lic', response.body);
       return response.body;
@@ -102,6 +100,42 @@ getLicenseFile(h, String act_token, String lid) async {
     }
   } catch (err) {
     print('ERROR: $err');
+  }
+}
+
+activateWithLicenseToken(h, String licenseid, String act_token) async {
+  try {
+    final String fingerprint = await utils.getFingerprint();
+    final _url = Uri.https('api.keygen.sh', '/v1/accounts/$acc/machines');
+    h['Authorization'] = "Bearer $act_token";
+    var body = convert.json.encode({
+      "data": {
+        "type": "machines",
+        "attributes": {
+          "fingerprint": '$fingerprint',
+          "platform": "Darwin",
+          "name": "Office MacBook Pro"
+        },
+        "relationships": {
+          "license": {
+            "data": {"type": "licenses", "id": "$licenseid"}
+          }
+        }
+      }
+    });
+    var response = await http.post(_url, headers: h, body: body);
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      print(green("\nMACHINE_ACTIVATED\n"));
+      var jsonResponse =
+          await convert.jsonDecode(response.body) as Map<String, dynamic>;
+      return jsonResponse;
+    } else {
+      print(red('Request failed with : ${response.body}.'));
+      return convert.jsonDecode(response.body) as Map<String, dynamic>;
+    }
+  } catch (err) {
+    print(red('ERROR: $err'));
   }
 }
 
@@ -143,12 +177,12 @@ void main() async {
   // String purl = utils.readStdin('Product URL');
   //mark mark
   String user_id = '103b7f20-04e9-40e2-9d39-067592d998e2';
-  print("\nCREATING LICENSE\n");
+  print(green('\nCREATING LICENSE\n'));
   final Map<String, dynamic> license_response =
       await createLicense(head, policy_id, user_id);
   final String license_id = await license_response['data']['id'];
 
-  print("\nCREATING LICENSE/ACTIVATION TOKEN\n");
+  print(green('\nCREATING LICENSE/ACTIVATION TOKEN\n'));
   final Map<String, dynamic> tkn_response =
       await createLicenseToken(head, license_id);
 
@@ -159,7 +193,7 @@ void main() async {
       await getEncryptedLicenseResponse(
           head, license_activation_token, license_id);
 
-  print("yo $enc_lic_response");
+  print(" $enc_lic_response");
 
   // print('Activation Token: $license_activation_token');
 }

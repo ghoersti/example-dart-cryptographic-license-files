@@ -1,11 +1,10 @@
 import 'package:cryptography/cryptography.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
-import 'package:args/args.dart';
 import 'dart:typed_data';
 import 'dart:convert';
-import 'dart:io';
 import 'package:dotenv/dotenv.dart';
+import 'package:dcli/dcli.dart';
 
 var env = DotEnv(includePlatformEnvironment: true)..load(['../.env']);
 var acc = env['KEYGEN_ACCOUNT_ID'];
@@ -14,19 +13,7 @@ var tkn = env['TOKEN'];
 
 offlineVerification(String license_file, String license_key) async {
   var decoder = utf8.fuse(base64);
-  // var parser = ArgParser();
-  //license-file cert
-  //license-key digest
-  //public-key pubkey
 
-  // parser.addOption('license-file', abbr: 'f', mandatory: true);
-  // parser.addOption('license-key', abbr: 'k', mandatory: true);
-  // parser.addOption('public-key', abbr: 'p', mandatory: true);
-
-  // var args = parser.parse(argv);
-
-  // Read and parse license file
-  // var cert = await File(license_path).readAsString();
   var cert = license_file;
   var enc = cert
       .replaceFirst('-----BEGIN LICENSE FILE-----', "")
@@ -59,10 +46,8 @@ offlineVerification(String license_file, String license_key) async {
   }
 
   // Print license file
-  print("license file was successfully verified!");
+  print(green("license file was successfully verified!"));
   print("  > $lic");
-  // var data = decoder.decode(lic['enc']);
-  // print('$data');
 
   // Hash the license key to obtain decryption secret
   var digest = sha256.convert(utf8.encode(license_key));
@@ -92,6 +77,7 @@ offlineVerification(String license_file, String license_key) async {
   // Print decrypted dataset
   var data = json.decode(plaintext);
 
-  print("license file was successfully decrypted!");
+  print(green("license file was successfully decrypted!"));
   print("  > $data");
+  return data;
 }
